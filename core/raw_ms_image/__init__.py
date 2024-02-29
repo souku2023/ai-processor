@@ -1,1 +1,1 @@
-from .raw_ms_image import RawMsImage
+from .raw_ms_image import RawMSImage

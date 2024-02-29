@@ -1,5 +1,4 @@
 exif==1.6.0
-GDAL @ file:///C:/Users/USER/Desktop/GA_WORK/ML/BAYER/codes/ai-processor/resources/gdal-wheel/GDAL-3.8.2-cp312-cp312-win_amd64.whl#sha256=383d0ae02deb96bfb7bc41ff34f811cde6602fb7163da27bcd5faf66466178da
 numpy==1.26.4
 piexif==1.1.3
 pillow==10.2.0

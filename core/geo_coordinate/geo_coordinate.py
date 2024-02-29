@@ -26,5 +26,9 @@ class GeoCoordinate:
     def __return_lon(self):
         return self.__lon
     LON = property(fget=__return_lon)
+
+
+    def __repr__(self) -> str:
+        return f"GEO COORDINATE: {self.__lat}, {self.__lon}"
     
 

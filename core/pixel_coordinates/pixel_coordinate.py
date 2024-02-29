@@ -23,3 +23,6 @@ class PixelCoordinate:
     def __get_y(self):
         return self.__Y
     Y = property(fget=__get_y)
+
+    def __repr__(self) -> str:
+        return f"PIXEL COORDINATE: {self.__X}, {self.__Y}"
