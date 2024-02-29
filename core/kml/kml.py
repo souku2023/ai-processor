@@ -8,9 +8,9 @@ from core.app_logger import AppLogger
 
 class KML:
     """
-    A class to extract data from a KML file.
-
-    Will later make it more inclusive instead of just for Farmer.
+    A class to extract data from a KML file and return the information within 
+    as an object which contains data required for this script to work. 
+    ### `This is exclusive to KMLs from Bayer.`
     """
 
     def __init__(self, path:str):
@@ -23,6 +23,12 @@ class KML:
         self.kml_data_dict = self.__extract_data_from_kml()
         self.kml_polygon = self.__return_shapely_polygon()
 
+
+    def __extract_data2(self):
+        """
+        """
+
+        self.__
 
     def __extract_data_from_kml(self) -> list|None:
         try:
@@ -64,7 +70,6 @@ class KML:
             AppLogger.warn(f"KML, Unable to extract data from {self.path}")
             return None
 
-    
     def __return_shapely_polygon(self) -> Polygon|None:
         """
         """
@@ -75,6 +80,7 @@ class KML:
             return poly
         except Exception as e:
             AppLogger.info("KML, Failed to create KML Polygon")
+
 
 if __name__ == "__main__":
     kml_dir_path = os.path.join(os.getcwd(), 'resources', 'kmls')

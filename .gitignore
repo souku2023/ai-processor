@@ -154,7 +154,7 @@ dmypy.json
 cython_debug/
 
 post_processing/
-env*/
+env_*/
 *env/
 *.tif
 *.kml
