@@ -1,5 +1,6 @@
 from core.geo_coordinate import GeoCoordinate
 from core.exiftool import Exiftool
+from core.app_logger import AppLogger
 from shapely import Point, Polygon
 import os
 class RawRGBImage:
@@ -14,6 +15,7 @@ class RawRGBImage:
 
         self.geo_location = self.__find_geo_location_image(self.path)
         self.geo_loc_point = Point(self.geo_location.LAT, self.geo_location.LON)
+        AppLogger.info(f"RawMSImage, Found raw RGB image {self.path} @ {self.geo_location.LAT}, {self.geo_location.LON}")
 
     
     def __find_geo_location_image(self, image_path:str)->GeoCoordinate|None:

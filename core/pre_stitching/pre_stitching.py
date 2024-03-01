@@ -36,23 +36,27 @@ class PreStitchProcessing:
         """
         executor = ThreadPoolExecutor()
         images = []
+        type_ = None
         for dir, subdirs, files in os.walk(path):
+            # AppLogger.info(f"PreStitchProcessing, in {dir}")
             if len(files)>0:
                 if len(list(filter(lambda x: '.tif' in x, files)))>0:
                     for file in files:
                         if '_1.tif' in file:
-                            a = file
-                            b = file.replace('_1.tif', '_2.tif')
-                            c = file.replace('_1.tif', '_3.tif')
-                            d = file.replace('_1.tif', '_4.tif')
-                            e = file.replace('_1.tif', '_5.tif')
-                            if ((a in files) and
-                                (b in files) and
-                                (c in files) and
-                                (d in files) and
-                                (e in files)):
+                            im_path = os.path.join(dir, file)
+                            a = im_path
+                            b = im_path.replace('_1.tif', '_2.tif')
+                            c = im_path.replace('_1.tif', '_3.tif')
+                            d = im_path.replace('_1.tif', '_4.tif')
+                            e = im_path.replace('_1.tif', '_5.tif')
+                            if ((os.path.basename(a) in files) and
+                                (os.path.basename(b) in files) and
+                                (os.path.basename(c) in files) and
+                                (os.path.basename(d) in files) and
+                                (os.path.basename(e) in files)):
                                 # 
-                                im_path = os.path.join(dir, file)
+                                
+                                # AppLogger.info(f"PreStitchProcessing, {a}")
 
                                 def append_ms_image(a, b, c, d, e, images):
                                     image = RawMSImage(
@@ -196,7 +200,6 @@ class PreStitchProcessing:
             (max_lat, min_lon),
             (max_lat, max_lon),
             (min_lat, min_lon)
-
         ]
         )
         for image in images_in_neighboorhood:
@@ -255,10 +258,10 @@ class PreStitchProcessing:
                 "ECO_KA_HAV_RAN_BEL_009_1"
                 ]
             group2 = [
-                "ECO_KA_HAV_RAN_BEL_050_1"
-                "ECO_KA_HAV_RAN_BEL_062_1"
-                "ECO_KA_HAV_RAN_BEL_063_1"
-                "ECO_KA_HAV_RAN_BEL_064_1"
+                "ECO_KA_HAV_RAN_BEL_050_1",
+                "ECO_KA_HAV_RAN_BEL_062_1",
+                "ECO_KA_HAV_RAN_BEL_063_1",
+                "ECO_KA_HAV_RAN_BEL_064_1",
                 "ECO_KA_HAV_RAN_BEL_049_1"
             ]
 
@@ -268,13 +271,14 @@ class PreStitchProcessing:
             for kml in kmls:
                 if kml.name in group1:
                     group1_polygons.append(kml.kml_polygon)
-                if kml.name in group2:
+                elif kml.name in group2:
                     group2_polygons.append(kml.kml_polygon)
 
             multipolygons = [MultiPolygon(group1_polygons), MultiPolygon(group2_polygons)]
 
             for multipolygon in multipolygons:
                 min_lat, min_lon, max_lat, max_lon = multipolygon.bounds
+                AppLogger.info(multipolygon)
                 new_polygon = Polygon(
                 [
                     (min_lat, min_lon),
@@ -286,9 +290,12 @@ class PreStitchProcessing:
                 )
                 images_in_polygon, images_in_neighboorhood = PreStitchProcessing.__get_images_in_polygon(new_polygon, images)
 
-                if len(images_in_polygon)<min_images_per_kml_rgb:
+            while len(images_in_polygon)<min_images_per_kml_rgb:
+                new_images, new_neighboorhood_images = PreStitchProcessing.__get_images_in_neighborhood_polygon(polygon=new_polygon, 
+                                                                         images_in_neighboorhood=images_in_neighboorhood)
                     
-
+                for new_im in new_images:
+                    images_in_polygon.append(new_im)
 
             
 
@@ -304,7 +311,8 @@ class PreStitchProcessing:
 
 
 if __name__ == "__main__":
-    path = r"C:\Users\sahas\OneDrive\Desktop\Comp\000"
+    path = r"D:\data\13-Feb-2024_Day_7_ RGB_Images\DCIM\geotagged_images"
+    # path = r"D:\data\11-Feb-2024_120meter_12ac_MS\Zoho WorkDrive (4)"
     # print(list(map(os.path.join, ["C:", "D:", "E:"], ["a", "b", "c"])))
     PreStitchProcessing._PreStitchProcessing__sort_images_from_kmls(path)
     # path = os.getcwd()
