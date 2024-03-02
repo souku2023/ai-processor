@@ -3,19 +3,24 @@ from core.exiftool import Exiftool
 from core.app_logger import AppLogger
 from shapely import Point, Polygon
 import os
+import shutil
 class RawRGBImage:
     """
     """
 
-    def __init__(self, path:str) -> None:
+    def __init__(self, path:str, geo_coords:GeoCoordinate=None) -> None:
         """
         """
 
         self.path = path
 
-        self.geo_location = self.__find_geo_location_image(self.path)
+        if geo_coords is None:
+            self.geo_location = self.__find_geo_location_image(self.path)
+        else:
+            self.geo_location = geo_coords
         self.geo_loc_point = Point(self.geo_location.LAT, self.geo_location.LON)
-        AppLogger.info(f"RawMSImage, Found raw RGB image {self.path} @ {self.geo_location.LAT}, {self.geo_location.LON}")
+       
+        AppLogger.info(f"RawRGBImage, Found raw RGB image {self.path} @ {self.geo_location.LAT}, {self.geo_location.LON}")
 
     
     def __find_geo_location_image(self, image_path:str)->GeoCoordinate|None:
@@ -35,3 +40,13 @@ class RawRGBImage:
         return (f"RawRGBImage@[{self.geo_location}] "
                 f"({os.path.basename(self.path)}, "
                 )
+    
+
+    def copy(self, dst):
+        """
+        """
+
+        shutil.copy(self.path, os.path.join(dst, os.path.basename(self.path)))
+
+
+        
