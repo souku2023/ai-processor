@@ -460,8 +460,8 @@ class PreStitchProcessing:
     @staticmethod
     def __sort_images_from_kmls(path_to_images:str,
                                  min_images_per_kml_rgb:int=100,
-                                 min_images_per_kml_ms:int=10,
-                                 extra_image_search:int=3
+                                 min_images_per_kml_ms:int=100,
+                                 extra_image_search_iteration:int=1
                                  )->list[dict]:
         """
         """
@@ -473,14 +473,17 @@ class PreStitchProcessing:
         grouped_image_list = list()
 
         for kml in kmls:
-            images_in_kml, images_in_neighboorhood = PreStitchProcessing.__get_images_in_kml(kml=kml, images=images)
+            (images_in_kml, 
+             images_in_neighboorhood) = PreStitchProcessing.__get_images_in_kml(kml=kml, images=images)
             k=0
             
             if image_type == PreStitchProcessing.ImageType.MS:
                 while len(images_in_kml)<min_images_per_kml_ms and len(images_in_kml)>0:
-                    if k>extra_image_search:
+                    if k>=extra_image_search_iteration:
                         break
-                    AppLogger.info(f"Not enough images in {kml} k={k}: {len(images_in_kml)}")
+                    AppLogger.info(
+                        f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_ms}]")
+                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k}")
                     new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_ms_kml(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
@@ -491,9 +494,11 @@ class PreStitchProcessing:
 
             if image_type == PreStitchProcessing.ImageType.RGB:
                 while len(images_in_kml)<min_images_per_kml_rgb and len(images_in_kml)>0:
-                    if k>3:
+                    if k>=extra_image_search_iteration:
                         break
-                    AppLogger.info(f"Not enough images in {kml} k={k}: {len(images_in_kml)}")
+                    AppLogger.info(
+                        f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_rgb}]")
+                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k}")
                     new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_ms_kml(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
@@ -501,7 +506,8 @@ class PreStitchProcessing:
                     for new_image in new_images:
                         images_in_kml.append(new_image)
                     k+=1
-            # 
+            # Visualise the images on the kml polygon using matplotlib iff the
+            # number of images found is greater than 0 
             if len(images_in_kml)>0:
                 PreStitchProcessing.__visualise_images_in_polygon(
                     kml.kml_polygon,
@@ -509,7 +515,9 @@ class PreStitchProcessing:
                     name=f"Images for {kml.name}",
                     timeout=2
                 )
-                AppLogger.info(f"Found {len(images_in_kml)} for {kml}")
+                AppLogger.info(f"PreStitchProcessing, Totally Found {len(images_in_kml)} for {kml}")
+                AppLogger.info("")
+                # AppLogger.info("")
                 grouped_image_list.append(
                     {
                         "name": kml.name,
@@ -532,19 +540,20 @@ class PreStitchProcessing:
     def __transfer_images(images_dict_list:list[dict], 
                           output_dir:str|None=None):
         """
+        Later change to a different library for faster copying speed.
         """
         copied_images_list = list()
         if output_dir is None:
             output_dir = Paths.output_dir()
 
         for image_dict in images_dict_list:
-            name = image_dict["name"]
+            plot_name = image_dict["name"]
             images = image_dict["images"]
             type_ = image_dict["type"]
             
-            image_dir = os.path.join(output_dir, type_, name)
+            image_dir = os.path.join(output_dir, type_, plot_name)
             os.makedirs(image_dir, exist_ok=True)
-            AppLogger.info(f"PreStitchProcessing, saving images to for plot {name} to {image_dir}")
+            AppLogger.info(f"PreStitchProcessing, saving images to for plot {plot_name} to {image_dir}")
             for image in images:
                 image:RawMSImage|RawRGBImage
                 copied_image_path = os.path.join(image_dir, os.path.basename(image.path))
@@ -565,7 +574,7 @@ class PreStitchProcessing:
                     
             copied_images_list.append(
                 {
-                    "name": name,
+                    "plot_name": plot_name,
                     "images_path": image_dir,
                 }
                 )
@@ -598,12 +607,10 @@ class PreStitchProcessing:
                 for point in points:
                     if point.x == 0 or point.y == 0:
                         continue
-                    axs.scatter(point.y, point.x, c='blue', s=5) 
+                    axs.scatter(point.y, point.x, c='blue') 
 
                 if name is not None:
                     plt.title(name)
-
-
 
             else:
                 # If the input is a single Polygon
@@ -613,7 +620,7 @@ class PreStitchProcessing:
                 timer.add_callback(plt.close)
                 plt.fill(y, x, c='red', alpha=0.2)
                 for point in points:
-                    plt.scatter(point.y, point.x, c='blue', s=5)
+                    plt.scatter(point.y, point.x, c='blue')
 
                 if name is not None:
                     plt.title(name)
@@ -630,7 +637,10 @@ class PreStitchProcessing:
 
 
     @staticmethod
-    def sort_images_by_kml(input_dir:str, output_dir:str|None=None, transfer:bool=True):
+    def sort_images_by_kml(input_dir:str, 
+                           output_dir:str|None=None,
+                           transfer:bool=True, 
+                           extra_image_search_iteration:int=1):
         """
         """
         
@@ -638,7 +648,8 @@ class PreStitchProcessing:
             AppLogger.info(f"PreStitchProcessing, Reading images from dir: {input_dir}")
             # Get the images whose geo locations lie inside the KMLs stored in ./resources/kmls/
             images_dict = PreStitchProcessing.__sort_images_from_kmls(
-                path_to_images=input_dir)
+                path_to_images=input_dir,
+                extra_image_search_iteration=extra_image_search_iteration)
             
             # Transfer images if the transfer is True (By default it is).
             if transfer:
@@ -660,6 +671,7 @@ if __name__ == "__main__":
     # Idea: Calculate the direction of the movement of the drone and then 
     # based on that find the images that that will be required to stitch the
     # image
-    PreStitchProcessing.sort_images_by_kml(path, r"D:\test", transfer=False)
+    PreStitchProcessing.sort_images_by_kml(path, r"D:\test")
+    # PreStitchProcessing.sort_images_by_kml(path, r"D:\test", transfer=False)
     # path = os.getcwd()
     

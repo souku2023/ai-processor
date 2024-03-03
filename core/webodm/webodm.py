@@ -1,13 +1,21 @@
 import requests
 import sys
 import os
+sys.path.append(os.getcwd())
 import glob
 import json 
 import time
 import datetime
+from typing import TYPE_CHECKING
 
 from core.utils.paths import Paths
 from core.app_logger import AppLogger
+from core.webodm.webodm_project import WebODMProject
+from core.webodm.status_codes_webodm import StatusCodes
+from core.webodm.response_codes import ResponseCodes
+
+if TYPE_CHECKING:
+    from webodm_task import WebODMTask
 
 class InvalidCredentialsError(Exception):pass
 
@@ -16,20 +24,12 @@ class WebODM:
     A convenience class for the WebODM API.
     """
 
-    class StatusCodes:
-        QUEUED = 10
-        RUNNING = 20
-        FAILED = 30
-        COMPLETED = 40
-        CANCELED = 50
-
-    class Options:
-        MIN_NUM_FEATURES = "min-num-features"
+    class NoImageDirectoriesFoundError(Exception):pass
 
     token = None
-    username = None
-    password = None
-    token_gen_time = None
+    __username = None
+    __password = None
+    __token_gen_time = None
     port = 8000
 
     initialised = False
@@ -40,14 +40,14 @@ class WebODM:
         """
         """
 
-        with open(Paths.webodm_credentials) as credentials_file:
+        with open(Paths.webodm_credentials()) as credentials_file:
             credentials = json.load(credentials_file)
 
         return credentials
 
     
     @staticmethod
-    def __check_token():
+    def __token_exists():
         """
         """
         if WebODM.token is not None:
@@ -60,26 +60,41 @@ class WebODM:
     def __get_token():
         """
         """
-        if WebODM.__check_token() is None:
+        # print(WebODM.__password)
+        if not WebODM.__token_exists():
             res = requests.post('http://localhost:8000/api/token-auth/', 
                         data={
-                            'username': WebODM.username,
-                            'password': WebODM.password
+                            'username': WebODM.__username,
+                            'password': WebODM.__password
                             }).json()
             
+            
+            
+            WebODM.__token_gen_time = time.time()
+            # AppLogger.info(f"WebODM, {json.dumps(res)}")
             if 'token' in res:
-                print("Logged-in!")
                 WebODM.token = res['token']
-                AppLogger.info("WebODM, Logged in.")
+                AppLogger.info(f"WebODM, Logged in with username: {WebODM.__username}!")
+                AppLogger.info(f"{WebODM.token}")
+                
             else:
                 raise InvalidCredentialsError("Invalid Credentials.")
 
             
     @staticmethod
-    def create_project(name:str):
+    def __project_create(name:str, description:str|None=None):
         """
+        Creates a Project in WebODM and returns a WebODMProject object.
         """
-        WebODM.__get_token()
+        WebODM.__initialise()
+
+        data_dict = {
+            'name': name,
+        }
+
+        if description is not None:
+            data_dict['description'] = description
+
         res = requests.post('http://localhost:8000/api/projects/', 
                         headers={'Authorization': 'JWT {}'.format(WebODM.token)},
                         data={'name': name}).json()
@@ -87,9 +102,9 @@ class WebODM:
         if 'id' in res:
             AppLogger.info("WebODM, Created project: {}".format(res)) 
             project_id = res['id']
-            return project_id
+            return WebODMProject(id=project_id, token=WebODM.token, name=name)
         else:
-            AppLogger.warn("WebODM, Unable to create project")
+            AppLogger.warn(f"WebODM, Unable to create project : {json.dumps(res)}")
             return None
         
 
@@ -97,10 +112,57 @@ class WebODM:
     def __initialise():
         """
         """
-        # Get username and password from resources
-        credentials = WebODM.__get_credentials()
-        WebODM.username = credentials["username"]
-        WebODM.password = credentials["password"]
+        # if WebODM.__token_gen_time is not None:
+        #     token_time_elapsed = time.time() - WebODM.__token_gen_time
+        # else:
+        #     token_time_elapsed=0
 
-        WebODM.__get_token()
+        if  (WebODM.initialised is False):
+            # Get username and password from resources
+            credentials = WebODM.__get_credentials()
+            WebODM.__username = credentials["username"]
+            WebODM.__password = credentials["password"]
+
+            # Get token
+            AppLogger.info("WebODM, Getting token...")
+            WebODM.__get_token()
+
+    def create_projects_from_folder(path:str, name:str, description:str|None=None):
+        """
+        """
+
+        files_ = os.listdir(path)
+
+        # Check if the path has enough folders
+        if len(files_)<1:
+            raise WebODM.NoImageDirectoriesFoundError(f"{len(files_)} directories found in path")
+
+        files = list()
+        for file in files_:
+            files.append(os.path.join(path, file))
+
+        project = WebODM.__project_create(name=name, description=description)
+        tasks = list()
+        for file in files:
+            task_name = f"{name}_{os.path.basename(file)}"
+            task_ = project.add_task(file, name=task_name)
+            tasks.append(task_)
+            AppLogger.info(f"WebODM, Created Task: {task_}")
+            
+        for task in tasks:
+            if task is not None:
+                AppLogger.info(f"WebODM, Starting {task}...")
+                task:'WebODMTask'
+                task.start()
+                task.wait_complete()
+                task.download_orthophoto()
+
         
+        
+        
+
+if __name__ == '__main__':
+    # proj = WebODM.project_create("Convenience func test")
+    # token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6IiIsInVzZXJuYW1lIjoicHl0b3JjaG9iaiIsImV4cCI6MTcwOTQ2NjI4OX0.cx0kDs83oNPh8lRlklluba7HyqbjI7pYqqtm1qws1lc"
+    images_dir = r"D:\test\RGB"
+    WebODM.create_projects_from_folder(path=images_dir, name="DEUS_EX_MACHINA")

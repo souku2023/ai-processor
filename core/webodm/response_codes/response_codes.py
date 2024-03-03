@@ -1,0 +1,5 @@
+class ResponseCodes:
+    NOT_FOUND = 404
+    MALFORMED_REQUEST = 400
+    FORBIDDEN = 403
+    UNAUTHENTICATED = 401
