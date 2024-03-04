@@ -37,6 +37,7 @@ class WebODMTask:
                  images_dir:str, 
                  project_reference: 'WebODMProject',
                  name:str|None=None,
+                 data_dict:dict|None=None,
                  options:list[dict]|None=None) -> None:
         """
         """
@@ -47,27 +48,29 @@ class WebODMTask:
         self.__token = project_reference.TOKEN
         self.__options = options
         self.__name = name
+        self.__data_dict = data_dict
 
         # Set Task Options 
         if self.__options is None:
             self.__options = [
                 {
                     'name': "orthophoto-resolution", 
-                    'value': 5
+                    'value': 1
                     },
             ]
         
         # Add more options
         self.add_option(self.Options.FAST_ORTHOPHOTO, True)
         self.add_option(self.Options.ORTHOPHOTO_CUTLINE, True)
-        self.add_option(self.Options.CROP, 10)
+        self.add_option(self.Options.MIN_NUM_FEATURES, 12500)
+        # self.add_option(self.Options.CROP, 10)
 
         # Set Details of task
-        if data_dict is None:
-            data_dict = { 
+        if self.__data_dict is None:
+            self.__data_dict = { 
                 'name': self.__name,
                 'auto_processing_node': True,
-                'resize_to': 2048,
+                # 'resize_to': 2048,
                 'options': json.dumps(self.__options)
                 }
         
@@ -120,7 +123,7 @@ class WebODMTask:
                 res = requests.post(req_url, 
                                     headers=auth_header,
                                     files=images,
-                                    data=data_dict).json()
+                                    data=self.__data_dict).json()
                 
                 self.__id = res["id"]
                 
