@@ -47,6 +47,29 @@ class WebODMTask:
         self.__token = project_reference.TOKEN
         self.__options = options
         self.__name = name
+
+        # Set Task Options 
+        if self.__options is None:
+            self.__options = [
+                {
+                    'name': "orthophoto-resolution", 
+                    'value': 5
+                    },
+            ]
+        
+        # Add more options
+        self.add_option(self.Options.FAST_ORTHOPHOTO, True)
+        self.add_option(self.Options.ORTHOPHOTO_CUTLINE, True)
+        self.add_option(self.Options.CROP, 10)
+
+        # Set Details of task
+        if data_dict is None:
+            data_dict = { 
+                'name': self.__name,
+                'auto_processing_node': True,
+                'resize_to': 2048,
+                'options': json.dumps(self.__options)
+                }
         
         AppLogger.info(f"WebODMTask, Created Task for {project_reference.NAME}")
         # try:
@@ -91,28 +114,6 @@ class WebODMTask:
                 # Get a list of images to be stitched
                 images = [('images', (os.path.basename(file), open(file, 'rb'), 'image/jpg')) for file in images_list]
                 
-                # Set Task Options 
-                if self.__options is None:
-                    self.__options = [
-                        {
-                            'name': "orthophoto-resolution", 
-                            'value': 5
-                            },
-                    ]
-                
-                # Add more options
-                self.add_option(self.Options.FAST_ORTHOPHOTO, True)
-                self.add_option(self.Options.ORTHOPHOTO_CUTLINE, True)
-                self.add_option(self.Options.CROP, 10)
-
-                # Set Details of task
-                if data_dict is None:
-                    data_dict = { 
-                        'name': self.__name,
-                        'auto_processing_node': True,
-                        'resize_to': 2048,
-                        'options': json.dumps(self.__options)
-                        }
                 # Post request
                 req_url = 'http://localhost:8000/api/projects/{}/tasks/'.format(self.__project_reference.ID)
                 auth_header = {'Authorization': 'JWT {}'.format(self.__token)}
@@ -120,9 +121,9 @@ class WebODMTask:
                                     headers=auth_header,
                                     files=images,
                                     data=data_dict).json()
+                
                 self.__id = res["id"]
                 
-
                 AppLogger.info(f"WebODMTask:{self.__name}@{self.__project_reference.NAME}, Created.")
                 return res
             else:

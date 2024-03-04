@@ -601,7 +601,7 @@ class PreStitchProcessing:
                 axs.set_aspect('equal', 'datalim')
                 for geom in poly.geoms:    
                     xs, ys = geom.exterior.xy    
-                    axs.fill(ys, xs, alpha=0.2, fc='r', ec='none')
+                    axs.fill(ys, xs, alpha=0.5, fc='r', ec='none')
                     
 
                 for point in points:
@@ -618,7 +618,7 @@ class PreStitchProcessing:
                 fig = plt.figure()
                 timer = fig.canvas.new_timer(interval = timeout*1000) 
                 timer.add_callback(plt.close)
-                plt.fill(y, x, c='red', alpha=0.2)
+                plt.fill(y, x, c='red', alpha=0.5)
                 for point in points:
                     plt.scatter(point.y, point.x, c='blue')
 
@@ -671,7 +671,7 @@ if __name__ == "__main__":
     # Idea: Calculate the direction of the movement of the drone and then 
     # based on that find the images that that will be required to stitch the
     # image
-    PreStitchProcessing.sort_images_by_kml(path, r"D:\test")
-    # PreStitchProcessing.sort_images_by_kml(path, r"D:\test", transfer=False)
+    # PreStitchProcessing.sort_images_by_kml(path, r"D:\test")
+    PreStitchProcessing.sort_images_by_kml(input_dir=path, output_dir=r"D:\test", transfer=False, extra_image_search_iteration=0)
     # path = os.getcwd()
     
