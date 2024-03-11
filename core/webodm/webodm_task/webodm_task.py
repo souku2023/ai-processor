@@ -4,6 +4,7 @@ import time
 import glob
 import json
 import os
+import shutil
 from core.webodm.response_codes import ResponseCodes
 from core.webodm.status_codes_webodm import StatusCodes
 from typing import Any
@@ -63,6 +64,7 @@ class WebODMTask:
         self.add_option(self.Options.FAST_ORTHOPHOTO, True)
         self.add_option(self.Options.ORTHOPHOTO_CUTLINE, True)
         self.add_option(self.Options.MIN_NUM_FEATURES, 12500)
+        # self.add_option(self.Options.ORTHOPHOTO_RESOLUTION, 12500)
         # self.add_option(self.Options.CROP, 10)
 
         # Set Details of task
@@ -249,7 +251,27 @@ class WebODMTask:
     def wait_upload(self):
         """
         """
-        status = self.get_status()
+            
+        
+        
+    def cleanup_local_images(self):
+        """
+        """
+        # status = self.get_status()
+        for image in os.listdir(self.__images_dir):
+            im_path = os.path.join(self.__images_dir, image)
+            if (not os.path.isdir(im_path)) and ('orthophoto' not in im_path):
+                try:
+                    os.remove(im_path)
+                    AppLogger.info(
+                        f"WebODMTask:{self.__name}@{self.__project_reference.NAME}, "
+                        f"Deleted: {os.path.basename(im_path)}")
+                except Exception as e:
+                    AppLogger.warn(
+                    f"WebODMTask:{self.__name}@{self.__project_reference.NAME}, "
+                    f"Unable to remove with excpetion: {e}"
+                    )
+        
 
 
     def __repr__(self) -> str:

@@ -70,7 +70,7 @@ class PreStitchProcessing:
         Writes a JSON file to store required image details in the path
         """
         json_path = os.path.join(Paths.image_json(), 
-                                 path.replace("\\", "_").replace(":", "")+".json")
+                                 path.replace("\\", "_").replace('/', '_').replace(":", "")+".json")
         
         if len(images_list)>0:
             AppLogger.info(f"PreStitchProcessing, Writing JSON file for path: {path} as {os.path.basename(json_path)}")
@@ -589,28 +589,43 @@ class PreStitchProcessing:
                                       name:str|None=None):
         """
         """
-        AppLogger.info(f"PreStitchProcessing, Plotting {name} with timeout: {timeout}s")
+        AppLogger.info(f"PreStitchProcessing, Plotting '{name}' with timeout: {timeout}s")
         
         try:
             # If the input is a list of polygons
             if polygon.__class__.__qualname__ == 'list':
-                poly = unary_union(polygon)
-                fig, axs = plt.subplots()
-                timer = fig.canvas.new_timer(interval = timeout*1000) 
-                timer.add_callback(plt.close)
-                axs.set_aspect('equal', 'datalim')
-                for geom in poly.geoms:    
-                    xs, ys = geom.exterior.xy    
-                    axs.fill(ys, xs, alpha=0.5, fc='r', ec='none')
-                    
+                if len(polygon)>1:
+                    poly = unary_union(polygon)
+                    fig, axs = plt.subplots()
+                    timer = fig.canvas.new_timer(interval = timeout*1000) 
+                    timer.add_callback(plt.close)
+                    axs.set_aspect('equal', 'datalim')
+                    for geom in poly.geoms:    
+                        xs, ys = geom.exterior.xy    
+                        axs.fill(ys, xs, alpha=0.5, fc='r', ec='none')
+                        
 
-                for point in points:
-                    if point.x == 0 or point.y == 0:
-                        continue
-                    axs.scatter(point.y, point.x, c='blue') 
+                    for point in points:
+                        if point.x == 0 or point.y == 0:
+                            continue
+                        axs.scatter(point.y, point.x, c='blue') 
 
-                if name is not None:
-                    plt.title(name)
+                    if name is not None:
+                        plt.title(name)
+                else:
+                    polygon = polygon[0]
+                    # If the input is a single Polygon
+                    x, y = polygon.exterior.xy
+                    fig = plt.figure()
+                    timer = fig.canvas.new_timer(interval = timeout*1000) 
+                    timer.add_callback(plt.close)
+                    plt.fill(y, x, c='red', alpha=0.5)
+                    for point in points:
+                        plt.scatter(point.y, point.x, c='blue')
+
+                    if name is not None:
+                        plt.title(name)
+
 
             else:
                 # If the input is a single Polygon
@@ -659,7 +674,7 @@ class PreStitchProcessing:
                     )
             
         except Exception as e:
-            AppLogger.warn(f"Failed with exception : {e.__class__.__qualname__}: {e}")
+            AppLogger.warn(f"PreStitchProcessing, Failed with exception : {e.__class__.__qualname__}: {e}")
 
         
 

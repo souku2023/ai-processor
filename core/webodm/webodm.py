@@ -127,7 +127,7 @@ class WebODM:
             AppLogger.info("WebODM, Getting token...")
             WebODM.__get_token()
 
-    def create_projects_from_folder(path:str, name:str, description:str|None=None):
+    def create_projects_from_folder(path:str, name:str, description:str|None=None, cleanup_local_images:bool=False):
         """
         """
 
@@ -153,9 +153,17 @@ class WebODM:
             if task is not None:
                 AppLogger.info(f"WebODM, Starting {task}...")
                 task:'WebODMTask'
+                task.add_option(task.Options.FAST_ORTHOPHOTO, True)
+                task.add_option(task.Options.ORTHOPHOTO_CUTLINE, True)
+                task.add_option(task.Options.MIN_NUM_FEATURES, 12500)
                 task.start()
                 task.wait_complete()
                 task.download_orthophoto()
+                if cleanup_local_images:
+                    AppLogger.info("WebODM, Cleaning up local images...")
+                    task.cleanup_local_images()
+                
+            
 
         
         
