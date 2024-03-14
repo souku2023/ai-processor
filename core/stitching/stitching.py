@@ -48,7 +48,7 @@ if __name__ == "__main__":
     else:
         name = name+"_5ms"
     
-    input_dir = r"G:\BAYER\PHASE-2\VISIT-2\_13-3-24 MS 60m 10ms 41 ac\13-3-24 MS 60m 10ms 41 ac\0000SET\ALL"
+    input_dir = r"G:\BAYER\PHASE-2\VISIT-2\13-3-24 RGB 120m 5ms 100ac\13-3-24 RGB 120m 5ms 100ac\geotagged_images"
     output_dir = r"G:\BAYER\poltwise_and_stitched_images\VISIT-2\day1\{}".format(name)
     
     

@@ -40,7 +40,9 @@ class RawMSImage:
         """
         """
         if self.geo_location is not None:
-            return polygon.contains(Point(self.geo_location.LAT, self.geo_location.LON))
+            return polygon.contains(Point(self.geo_location.LON, self.geo_location.LAT))
+        else:
+            AppLogger.warn(f"RawMSImage, no geoloc avaialable")
         
 
     def __repr__(self) -> str:

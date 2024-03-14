@@ -48,7 +48,7 @@ class PreStitchProcessing:
         """
         os.makedirs(Paths.image_json(), exist_ok=True)
         json_path = os.path.join(Paths.image_json(), 
-                                 path.replace("\\", "_").replace(":", "")+".json")
+                                 path.replace("\\", "_").replace('/', '_').replace(":", "").replace(" ", "-")+".json")
         
         if os.path.exists(json_path):
             with open(json_path) as image_details:
@@ -155,7 +155,7 @@ class PreStitchProcessing:
 
                             executor.submit(append_rgb_image, im_path, images, images_detail_list)
             executor.shutdown(wait=True)
-            # PreStitchProcessing.__write_json(path, images_detail_list)
+            PreStitchProcessing.__write_json(path, images_detail_list)
             return (type_, images)
         
         else:
@@ -200,6 +200,7 @@ class PreStitchProcessing:
         images_in_neighborhood = list()
         AppLogger.info(f"PreStitchProcessing, Finding images in {kml}")
         for image in images:
+            # print(kml.border_polygon, image.geo_location)
             if image.is_in_polygon(kml.border_polygon):
                 images_in_kml.append(image)
             else:
@@ -216,6 +217,7 @@ class PreStitchProcessing:
         """
         images_in_polygon = list()
         images_in_neighborhood = list()
+        # print(len(images))
         for image in images:
             if image.is_in_polygon(polygon):
                 images_in_polygon.append(image)
@@ -248,10 +250,10 @@ class PreStitchProcessing:
         new_neighboorhood_images = list()
         lats = []
         lons = []
-        neighboorhood_multipoint = MultiPoint([(image.geo_location.LAT, image.geo_location.LON) for image in images_in_neighboorhood])
+        neighboorhood_multipoint = MultiPoint([(image.geo_location.LON, image.geo_location.LAT) for image in images_in_neighboorhood])
         for coord in kml.border_polygon.exterior.coords:
             _, nearest_image_loc = nearest_points(Point(coord), neighboorhood_multipoint)
-            lat, lon = nearest_image_loc.x, nearest_image_loc.y
+            lat, lon = nearest_image_loc.y, nearest_image_loc.x
             lats.append(lat)
             lons.append(lon)
         
@@ -274,6 +276,10 @@ class PreStitchProcessing:
                 new_images.append(image)
             else:
                 new_neighboorhood_images.append(image)
+                
+        # plt.fill(*kml.border_polygon.exterior.xy, alpha=0.2, c='r')
+        # plt.fill(*new_polygon.exterior.xy, alpha=0.2, c='g')
+        # plt.show()
 
         return new_images, new_neighboorhood_images
     
@@ -289,10 +295,12 @@ class PreStitchProcessing:
         neighboorhood_multipoint = MultiPoint([(image.geo_location.LAT, image.geo_location.LON) for image in images_in_neighboorhood])
         for coord in kml.border_polygon.exterior.coords:
             origin, nearest_image_loc = nearest_points(Point(coord), neighboorhood_multipoint)
-            euclidean_distance = origin.distance(nearest_image_loc)
+            euclidean_distance = Point(coord).distance(nearest_image_loc)
             euclidean_distances_list.append(euclidean_distance)
+            # print(euclidean_distance)
             
         max_euclidean_dist = max(euclidean_distances_list)
+        # print(max_euclidean_dist)
         
         new_polygon = kml.border_polygon.buffer(max_euclidean_dist)
             
@@ -303,6 +311,10 @@ class PreStitchProcessing:
                 new_images.append(image)
             else:
                 new_neighboorhood_images.append(image)
+                
+        # plt.fill(*kml.border_polygon.exterior.xy, alpha=0.2, c='r')
+        # # plt.fill(*new_polygon.exterior.xy, alpha=0.2, c='g')
+        # plt.show()
 
         return new_images, new_neighboorhood_images
     
@@ -530,7 +542,7 @@ class PreStitchProcessing:
                     AppLogger.info(
                         f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_rgb}]")
                     AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k}")
-                    new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_ms_kml(
+                    new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_buffered_border_polygon(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
                         )
@@ -561,7 +573,8 @@ class PreStitchProcessing:
         PreStitchProcessing.__visualise_images_in_polygon(
             polygon=[kml.kml_polygon for kml in kmls],
             points=[image_.geo_loc_point for image_ in images],
-            name="All Images in all the plot"
+            name="All Images in all the plot",
+            timeout=60
         )
 
         return grouped_image_list
@@ -631,9 +644,10 @@ class PreStitchProcessing:
                     timer = fig.canvas.new_timer(interval = timeout*1000) 
                     timer.add_callback(plt.close)
                     axs.set_aspect('equal', 'datalim')
-                    for geom in poly.geoms:    
+                    for geom in poly.geoms:  
+                        # AppLogger.info(f"{poly}. {points[0]}")  
                         xs, ys = geom.exterior.xy    
-                        axs.fill(ys, xs, alpha=0.5, fc='r', ec='none')
+                        axs.fill(xs, ys, alpha=0.5, fc='r', ec='none')
                         
 
                     for point in points:
@@ -645,12 +659,14 @@ class PreStitchProcessing:
                         plt.title(name)
                 else:
                     polygon = polygon[0]
+                    # AppLogger.info(f"{polygon}")  
+                    
                     # If the input is a single Polygon
                     x, y = polygon.exterior.xy
                     fig = plt.figure()
                     timer = fig.canvas.new_timer(interval = timeout*1000) 
                     timer.add_callback(plt.close)
-                    plt.fill(y, x, c='red', alpha=0.5)
+                    plt.fill(x, y, c='red', alpha=0.5)
                     for point in points:
                         plt.scatter(point.y, point.x, c='blue')
 
@@ -661,10 +677,11 @@ class PreStitchProcessing:
             else:
                 # If the input is a single Polygon
                 x, y = polygon.exterior.xy
+                # AppLogger.info(f"{polygon}")
                 fig = plt.figure()
                 timer = fig.canvas.new_timer(interval = timeout*1000) 
                 timer.add_callback(plt.close)
-                plt.fill(y, x, c='red', alpha=0.5)
+                plt.fill(x, y, c='red', alpha=0.5)
                 for point in points:
                     plt.scatter(point.y, point.x, c='blue')
 
@@ -711,13 +728,13 @@ class PreStitchProcessing:
 
 if __name__ == "__main__":
     path = r"C:\Users\sahas\OneDrive\Desktop\Comp\000"
-    path = r"D:\12-Feb-2024_Day_6_RGB_Images\geotagged_images"
+    path = r"G:\BAYER\PHASE-2\VISIT-2\13-3-24 RGB 120m 5ms 100ac\13-3-24 RGB 120m 5ms 100ac\geotagged_images"
     # path = r"D:\data\11-Feb-2024_120meter_12ac_MS\Zoho WorkDrive (4)"
     # print(list(map(os.path.join, ["C:", "D:", "E:"], ["a", "b", "c"])))
     # Idea: Calculate the direction of the movement of the drone and then 
     # based on that find the images that that will be required to stitch the
     # image
     # PreStitchProcessing.sort_images_by_kml(path, r"D:\test")
-    PreStitchProcessing.sort_images_by_kml(input_dir=path, output_dir=r"D:\test", transfer=False, extra_image_search_iteration=0)
+    PreStitchProcessing.sort_images_by_kml(input_dir=path, output_dir=r"D:\test", transfer=False, extra_image_search_iteration=2)
     # path = os.getcwd()
     

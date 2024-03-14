@@ -34,7 +34,7 @@ class RawRGBImage:
         """
         """
         if self.geo_location is not None:
-            return polygon.contains(Point(self.geo_location.LAT, self.geo_location.LON))
+            return polygon.contains(Point(self.geo_location.LON, self.geo_location.LAT))
         
     def __repr__(self) -> str:
         return (f"RawRGBImage@[{self.geo_location}] "
