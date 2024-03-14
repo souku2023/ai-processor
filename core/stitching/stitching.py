@@ -39,11 +39,17 @@ if __name__ == "__main__":
     img_type = input("Enter Image Type (RGB or MS): ")
     alt =      input("Enter Altitude (60, 80, 120): ")
     session =  input("Enter Session (Morning, Afternoon, Evening): ")
+    speed = "10ms"
     
     name = f"DAY{day}_{date}_{img_type}_{alt}m_{session}"
     
-    input_dir = r"G:\BAYER\PHASE-2\VISIT-1\11-Feb-2024_Day_5_RGB_Images\11-Feb-2024_120meter_100ac_RGB\DCIM\geotagged_images"
-    output_dir = r"G:\BAYER\poltwise_and_stitched_images\day5\{}".format(name)
+    if speed is not None:
+        name = name+"_"+speed
+    else:
+        name = name+"_5ms"
+    
+    input_dir = r"G:\BAYER\PHASE-2\VISIT-2\_13-3-24 MS 60m 10ms 41 ac\13-3-24 MS 60m 10ms 41 ac\0000SET\ALL"
+    output_dir = r"G:\BAYER\poltwise_and_stitched_images\VISIT-2\day1\{}".format(name)
     
     
     Stitching.stitch_images_by_kml(input_dir=input_dir, output_dir=output_dir, project_name=name)

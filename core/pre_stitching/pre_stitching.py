@@ -70,7 +70,7 @@ class PreStitchProcessing:
         Writes a JSON file to store required image details in the path
         """
         json_path = os.path.join(Paths.image_json(), 
-                                 path.replace("\\", "_").replace('/', '_').replace(":", "")+".json")
+                                 path.replace("\\", "_").replace('/', '_').replace(":", "").replace(" ", "-")+".json")
         
         if len(images_list)>0:
             AppLogger.info(f"PreStitchProcessing, Writing JSON file for path: {path} as {os.path.basename(json_path)}")
@@ -155,7 +155,7 @@ class PreStitchProcessing:
 
                             executor.submit(append_rgb_image, im_path, images, images_detail_list)
             executor.shutdown(wait=True)
-            PreStitchProcessing.__write_json(path, images_detail_list)
+            # PreStitchProcessing.__write_json(path, images_detail_list)
             return (type_, images)
         
         else:

@@ -141,7 +141,7 @@ class GUI(tk.Tk):
         self.output_path.set(file)
         
     def submit(self):
-        self.name = f"DAY{self.date_entry.get()}_{self.date_entry.get()}_{self.alt_option.get()}m_{self.session_option.get()}_{self.image_type_option.get()}"
+        self.name = f"DAY{self.day_entry.get()}_{self.date_entry.get()}_{self.alt_option.get()}m_{self.session_option.get()}_{self.image_type_option.get()}"
         project_name, output_dir, input_dir = a.get_dets()
         AppLogger.info(f"Added new project: {self.name}")
         self.tasks.append(

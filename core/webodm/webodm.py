@@ -156,6 +156,7 @@ class WebODM:
                 task.add_option(task.Options.FAST_ORTHOPHOTO, True)
                 task.add_option(task.Options.ORTHOPHOTO_CUTLINE, True)
                 task.add_option(task.Options.MIN_NUM_FEATURES, 12500)
+                task.add_option(task.Options.RADIOMETRIC_CALIBRATION, 'camera+sun')
                 task.start()
                 task.wait_complete()
                 task.download_orthophoto()
