@@ -22,7 +22,7 @@ class KML:
         self.coordinates_string = None
         self.kml_data_dict = self.__extract_data_from_kml()
         self.border_polygon = self.__return_shapely_polygon()
-        self.border_polygon = self.border_polygon
+        self.kml_polygon = self.border_polygon
         AppLogger.info(f"KML, Initialised KML {self.name}")
 
 
