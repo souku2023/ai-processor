@@ -10,6 +10,9 @@ class GeoCoordinate:
     - `height` - (Optional)
     """
 
+    class NotGeoCoordinateError(ValueError): pass
+    
+
     def __init__(self, latitude: float, longitude: float, height:float=0.0):
         """
         """
@@ -29,6 +32,28 @@ class GeoCoordinate:
 
 
     def __repr__(self) -> str:
-        return f"GEO COORDINATE: {self.__lat}, {self.__lon}"
+        return f"GEO COORDINATE: LAT: {self.__lat}, LON: {self.__lon}"
+    
+    def __add__(self, other):
+        if other.__class__.__qualname__ == self.__class__.__qualname__:
+            longitude = self.LAT + other.LAT
+            latitude = self.LON + other.LON
+        else: 
+            raise GeoCoordinate.NotGeoCoordinateError("Added value is not a Geocoordinate")
+        return (longitude, latitude)
+
+    def __sub__(self, other):
+        if other.__class__.__qualname__ == self.__class__.__qualname__:
+            longitude = self.LAT - other.LAT
+            latitude = self.LON - other.LON
+        else: 
+            raise GeoCoordinate.NotGeoCoordinateError("Subtracted value is not a Geocoordinate")
+        return (longitude, latitude)
+
+
+if __name__ == '__main__':
+    a = GeoCoordinate(latitude=0.4235, longitude=0.6354534)
+    b = GeoCoordinate(latitude=0.94235, longitude=0.19354534)
+    print(a+b)
     
 

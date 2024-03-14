@@ -200,7 +200,7 @@ class PreStitchProcessing:
         images_in_neighborhood = list()
         AppLogger.info(f"PreStitchProcessing, Finding images in {kml}")
         for image in images:
-            if image.is_in_polygon(kml.kml_polygon):
+            if image.is_in_polygon(kml.border_polygon):
                 images_in_kml.append(image)
             else:
                 images_in_neighborhood.append(image)
@@ -249,7 +249,7 @@ class PreStitchProcessing:
         lats = []
         lons = []
         neighboorhood_multipoint = MultiPoint([(image.geo_location.LAT, image.geo_location.LON) for image in images_in_neighboorhood])
-        for coord in kml.kml_polygon.exterior.coords:
+        for coord in kml.border_polygon.exterior.coords:
             _, nearest_image_loc = nearest_points(Point(coord), neighboorhood_multipoint)
             lat, lon = nearest_image_loc.x, nearest_image_loc.y
             lats.append(lat)
@@ -279,7 +279,9 @@ class PreStitchProcessing:
     
 
     @staticmethod
-    def __get_images_in_neighborhood_polygon(polygon:Polygon, images_in_neighboorhood:list[RawRGBImage])->tuple[list[RawMSImage], list[RawMSImage]]:
+    def __get_images_in_neighborhood_polygon(polygon:Polygon, 
+                                             images_in_neighboorhood:list[RawRGBImage]
+                                             )->tuple[list[RawMSImage], list[RawMSImage]]:
         """
         """
         new_neighboorhood_images = list()
@@ -351,7 +353,7 @@ class PreStitchProcessing:
 
                 if len(images_in_kml)>0:
                     PreStitchProcessing.__visualise_images_in_polygon(
-                        kml.kml_polygon,
+                        kml.border_polygon,
                         points=[image.geo_loc_point for image in images_in_kml],
                         name=f"Images for {kml.name}",
                         timeout=2
@@ -367,7 +369,7 @@ class PreStitchProcessing:
             # Visualise all the images on all the polygons
             AppLogger.info(f"{len(images)}")
             PreStitchProcessing.__visualise_images_in_polygon(
-                polygon=[kml.kml_polygon for kml in kmls],
+                polygon=[kml.border_polygon for kml in kmls],
                 points=[image_.geo_loc_point for image_ in images],
                 name="All Images in all the plot"
             )
@@ -395,9 +397,9 @@ class PreStitchProcessing:
 
             for kml in kmls:
                 if kml.name in group1:
-                    group1_polygons.append(kml.kml_polygon)
+                    group1_polygons.append(kml.border_polygon)
                 elif kml.name in group2:
-                    group2_polygons.append(kml.kml_polygon)
+                    group2_polygons.append(kml.border_polygon)
 
             multipolygons = {
                 "G1": MultiPolygon(group1_polygons), 
@@ -449,7 +451,7 @@ class PreStitchProcessing:
             
             AppLogger.info(f"PreStitchPreocessing, Total images : {len(images)}")
             PreStitchProcessing.__visualise_images_in_polygon(
-                polygon=[kml.kml_polygon for kml in kmls],
+                polygon=[kml.border_polygon for kml in kmls],
                 points=[image_.geo_loc_point for image_ in images],
                 name="All Images in all the plots"
             )
@@ -510,7 +512,7 @@ class PreStitchProcessing:
             # number of images found is greater than 0 
             if len(images_in_kml)>0:
                 PreStitchProcessing.__visualise_images_in_polygon(
-                    kml.kml_polygon,
+                    kml.border_polygon,
                     points=[image.geo_loc_point for image in images_in_kml],
                     name=f"Images for {kml.name}",
                     timeout=2
@@ -528,7 +530,7 @@ class PreStitchProcessing:
         # Visualise all the images on all the polygons
         AppLogger.info(f"{len(images)}")
         PreStitchProcessing.__visualise_images_in_polygon(
-            polygon=[kml.kml_polygon for kml in kmls],
+            polygon=[kml.border_polygon for kml in kmls],
             points=[image_.geo_loc_point for image_ in images],
             name="All Images in all the plot"
         )

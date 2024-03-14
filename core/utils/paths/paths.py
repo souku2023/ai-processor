@@ -35,10 +35,6 @@ class Paths:
         return os.path.join(Paths.base_path(), 'resources', 'gdal-wheel', 'GDAL-3.8.2-cp312-cp312-win_amd64.whl')
     
     @staticmethod
-    def output_dir():
-        return os.path.join(Paths.base_path(), 'outputs')
-    
-    @staticmethod
     def webodm_credentials():
         return os.path.join(Paths.base_path(), 'resources', 'webodm_creds.json')
     
@@ -46,7 +42,11 @@ class Paths:
     def image_json():
         return os.path.join(Paths.base_path(), 'resources', 'image_details')
     
-
+    @staticmethod
+    def output_dir():
+        output_path = os.path.join(Paths.base_path(), 'output')
+        os.makedirs(output_path, exist_ok=True)
+        return output_path
 
 if __name__ == "__main__":
     print(Paths.kmls_path())
