@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="ECO_KA_HAV_RAN_BEL_046_1.kml" id="ECO_KA_HAV_RAN_BEL_046_1.kml">
+	<SimpleField name="timestamp" type="string"></SimpleField>
+	<SimpleField name="begin" type="string"></SimpleField>
+	<SimpleField name="end" type="string"></SimpleField>
+	<SimpleField name="altitudeMode" type="string"></SimpleField>
+	<SimpleField name="tessellate" type="int"></SimpleField>
+	<SimpleField name="extrude" type="int"></SimpleField>
+	<SimpleField name="visibility" type="int"></SimpleField>
+	<SimpleField name="drawOrder" type="int"></SimpleField>
+	<SimpleField name="icon" type="string"></SimpleField>
+	<SimpleField name="FarmId" type="string"></SimpleField>
+	<SimpleField name="FarmerCode" type="string"></SimpleField>
+	<SimpleField name="AreaUnderProject" type="float"></SimpleField>
+	<SimpleField name="Longitude" type="float"></SimpleField>
+	<SimpleField name="Season" type="string"></SimpleField>
+	<SimpleField name="State" type="string"></SimpleField>
+</Schema>
+<Folder><name>ECO_KA_HAV_RAN_BEL_046_1.kml</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#ECO_KA_HAV_RAN_BEL_046_1.kml">
+		<SimpleData name="tessellate">-1</SimpleData>
+		<SimpleData name="FarmId">ECO_KA_HAV_RAN_BEL_046_1</SimpleData>
+		<SimpleData name="FarmerCode">ECO/KA/HAV/RAN/BEL/046</SimpleData>
+		<SimpleData name="AreaUnderProject">3</SimpleData>
+		<SimpleData name="Longitude">75.741516</SimpleData>
+		<SimpleData name="Season">Kharif</SimpleData>
+		<SimpleData name="State">Karnataka</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>75.7407167,14.7141139 75.7416447,14.7140232 75.7424467,14.7139505 75.7422295,14.713743 75.7415643,14.7131982 75.7410842,14.713289 75.7407838,14.7133383 75.7407167,14.7141139</coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+</Folder>
+</Document></kml>
