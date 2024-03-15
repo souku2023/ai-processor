@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="ECO_KA_HAV_RAN_BEL_078_subplot.kml" id="ECO_KA_HAV_RAN_BEL_078_subplot.kml">
+	<SimpleField name="timestamp" type="string"></SimpleField>
+	<SimpleField name="begin" type="string"></SimpleField>
+	<SimpleField name="end" type="string"></SimpleField>
+	<SimpleField name="altitudeMode" type="string"></SimpleField>
+	<SimpleField name="tessellate" type="int"></SimpleField>
+	<SimpleField name="extrude" type="int"></SimpleField>
+	<SimpleField name="visibility" type="int"></SimpleField>
+	<SimpleField name="drawOrder" type="int"></SimpleField>
+	<SimpleField name="icon" type="string"></SimpleField>
+	<SimpleField name="FarmId" type="string"></SimpleField>
+	<SimpleField name="FarmerCode" type="string"></SimpleField>
+	<SimpleField name="AreaUnderProject" type="float"></SimpleField>
+	<SimpleField name="Longitude" type="float"></SimpleField>
+	<SimpleField name="Season" type="string"></SimpleField>
+	<SimpleField name="State" type="string"></SimpleField>
+</Schema>
+<Folder><name>ECO_KA_HAV_RAN_BEL_078_subplot.kml</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#ECO_KA_HAV_RAN_BEL_078_subplot.kml">
+		<SimpleData name="tessellate">-1</SimpleData>
+		<SimpleData name="FarmId">ECO_KA_HAV_RAN_BEL_078_subplot</SimpleData>
+		<SimpleData name="FarmerCode">ECO/KA/HAV/RAN/BEL/078</SimpleData>
+		<SimpleData name="AreaUnderProject">6</SimpleData>
+		<SimpleData name="Longitude">75.741123</SimpleData>
+		<SimpleData name="Season">Kharif</SimpleData>
+		<SimpleData name="State">Karnataka</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>75.74234317636224,14.71332426831945 75.74256637865476,14.71328401045715 75.74260751897539,14.71350808908596 75.74237742590462,14.71355006126669 75.74234317636224,14.71332426831945 </coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+</Folder>
+</Document></kml>
