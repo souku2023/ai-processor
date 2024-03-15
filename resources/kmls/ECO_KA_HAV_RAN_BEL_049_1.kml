@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="ECO_KA_HAV_RAN_BEL_049_1.kml" id="ECO_KA_HAV_RAN_BEL_049_1.kml">
+	<SimpleField name="timestamp" type="string"></SimpleField>
+	<SimpleField name="begin" type="string"></SimpleField>
+	<SimpleField name="end" type="string"></SimpleField>
+	<SimpleField name="altitudeMode" type="string"></SimpleField>
+	<SimpleField name="tessellate" type="int"></SimpleField>
+	<SimpleField name="extrude" type="int"></SimpleField>
+	<SimpleField name="visibility" type="int"></SimpleField>
+	<SimpleField name="drawOrder" type="int"></SimpleField>
+	<SimpleField name="icon" type="string"></SimpleField>
+	<SimpleField name="FarmId" type="string"></SimpleField>
+	<SimpleField name="FarmerCode" type="string"></SimpleField>
+	<SimpleField name="AreaUnderProject" type="float"></SimpleField>
+	<SimpleField name="Longitude" type="float"></SimpleField>
+	<SimpleField name="Season" type="string"></SimpleField>
+	<SimpleField name="State" type="string"></SimpleField>
+</Schema>
+<Folder><name>ECO_KA_HAV_RAN_BEL_049_1.kml</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#ECO_KA_HAV_RAN_BEL_049_1.kml">
+		<SimpleData name="tessellate">-1</SimpleData>
+		<SimpleData name="FarmId">ECO_KA_HAV_RAN_BEL_049_1</SimpleData>
+		<SimpleData name="FarmerCode">ECO/KA/HAV/RAN/BEL/049</SimpleData>
+		<SimpleData name="AreaUnderProject">8</SimpleData>
+		<SimpleData name="Longitude">75.741065</SimpleData>
+		<SimpleData name="Season">Kharif</SimpleData>
+		<SimpleData name="State">Karnataka</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>75.7409196,14.7121303 75.741161,14.7120344 75.7411047,14.7118787 75.7427355,14.7113002 75.7438244,14.7110226 75.7445352,14.7108131 75.7446492,14.7110482 75.7454404,14.7107887 75.7448958,14.7102979 75.74448,14.7104483 75.744377,14.7102975 75.743096,14.7105833 75.743151,14.710796 75.7415001,14.7112396 75.741338,14.7109966 75.7407909,14.7111497 75.7408713,14.7113443 75.7404154,14.7114818 75.7407399,14.7118476 75.7409196,14.7121303</coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+</Folder>
+</Document></kml>
