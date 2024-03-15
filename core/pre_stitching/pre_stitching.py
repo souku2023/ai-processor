@@ -374,6 +374,7 @@ class PreStitchProcessing:
                                  extra_image_search_iteration:int=1
                                  )->list[dict]:
         """
+        Iterates through all the images and
         """
         # Read KMLs from the directory ./resources/kmls
         kmls = PreStitchProcessing.__read_kmls()
@@ -382,33 +383,38 @@ class PreStitchProcessing:
         image_type, images = PreStitchProcessing.__get_images(path=path_to_images)
         grouped_image_list = list()
 
+        # Iterate through the KMLs to find images corresponding to them.
         for kml in kmls:
             (images_in_kml, 
              images_in_neighboorhood) = PreStitchProcessing.__get_images_in_kml(kml=kml, images=images)
             k=0
-            
+            # If image is Multispectral
             if image_type == PreStitchProcessing.ImageType.MS:
                 while len(images_in_kml)<min_images_per_kml_ms and len(images_in_kml)>0:
                     if k>=extra_image_search_iteration:
                         break
                     AppLogger.info(
                         f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_ms}]")
-                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k} using __get_images_from_neighborhood_buffered_border_polygon")
+                    AppLogger.info(
+                        f"PreStitchProcessing, Searching for images in neighboorhood k={k} using buffered border polygon.")
+                    # Get images in neighborhood using a buffered polygon; i.e. a padded polygon.
                     new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_buffered_border_polygon(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
                         )
+                    # Append the new images to the list of images
                     for new_image in new_images:
                         images_in_kml.append(new_image)
                     k+=1
-
+            # If imaage is RGB
             if image_type == PreStitchProcessing.ImageType.RGB:
                 while len(images_in_kml)<min_images_per_kml_rgb and len(images_in_kml)>0:
                     if k>=extra_image_search_iteration:
                         break
                     AppLogger.info(
                         f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_rgb}]")
-                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k} using __get_images_from_neighborhood_buffered_border_polygon")
+                    AppLogger.info(
+                        f"PreStitchProcessing, Searching for images in neighboorhood k={k} using buffered border polygon")
                     new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_buffered_border_polygon(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
@@ -423,11 +429,11 @@ class PreStitchProcessing:
                     kml.kml_polygon,
                     points=[image.geo_loc_point for image in images_in_kml],
                     name=f"Images for {kml.name}",
-                    timeout=10
+                    timeout=2
                 )
-                AppLogger.info(f"PreStitchProcessing, Totally Found {len(images_in_kml)} for {kml}")
+                AppLogger.info(
+                    f"PreStitchProcessing, Totally Found {len(images_in_kml)} for {kml}")
                 AppLogger.info("")
-                # AppLogger.info("")
                 grouped_image_list.append(
                     {
                         "name": kml.name,
@@ -435,12 +441,16 @@ class PreStitchProcessing:
                         "type": image_type
                     }
                     )
-        # Visualise all the images on all the polygons
+            else:
+                AppLogger.warn(
+                    f"PreStitchProcessing.__sort_images_from_kmls," 
+                    f" Did not find images for {kml}")
+        # Visualise all the images on all the KMLs.
         AppLogger.info(f"{len(images)}")
         PreStitchProcessing.__visualise_images_in_polygon(
             polygon=[kml.kml_polygon for kml in kmls],
             points=[image_.geo_loc_point for image_ in images],
-            name="All Images in all the plot",
+            name="All Images in all the plots",
             timeout=60
         )
 
@@ -590,13 +600,13 @@ class PreStitchProcessing:
 
 if __name__ == "__main__":
     path = r"C:\Users\sahas\OneDrive\Desktop\Comp\000"
-    path = r"G:\BAYER\PHASE-2\VISIT-2\_13-3-24 MS 60m 10ms 41 ac\13-3-24 MS 60m 10ms 41 ac\0000SET\ALL"
+    path = r"C:\Users\Admin\Downloads\13_geotagged)\geotagged_images"
     # path = r"D:\data\11-Feb-2024_120meter_12ac_MS\Zoho WorkDrive (4)"
     # print(list(map(os.path.join, ["C:", "D:", "E:"], ["a", "b", "c"])))
     # Idea: Calculate the direction of the movement of the drone and then 
     # based on that find the images that that will be required to stitch the
     # image
     # PreStitchProcessing.sort_images_by_kml(path, r"D:\test")
-    PreStitchProcessing.sort_images_by_kml(input_dir=path, output_dir=r"D:\test", transfer=False, extra_image_search_iteration=2)
+    PreStitchProcessing.sort_images_by_kml(input_dir=path, output_dir=r"D:\test", transfer=False, extra_image_search_iteration=0)
     # path = os.getcwd()
     

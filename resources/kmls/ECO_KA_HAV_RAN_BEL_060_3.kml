@@ -30,7 +30,7 @@
 		<SimpleData name="Season">Kharif</SimpleData>
 		<SimpleData name="State">Karnataka</SimpleData>
 	</SchemaData></ExtendedData>
-      <Polygon><outerBoundaryIs><LinearRing><coordinates>75.7414853,14.7127025 75.7416355,14.713032 75.7417508,14.7131564 75.7424562,14.7130086 75.7433762,14.7128348 75.7431804,14.7123808 75.7430678,14.7121058 75.7422014,14.7124249 75.7414853,14.7127025</coordinates></LinearRing></outerBoundaryIs></Polygon>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>75.74163568363582,14.71303262805411 75.74318532535351,14.71238810847143 75.74337569782577,14.7128350917078 75.7417510703515,14.71315650018757 75.74163568363582,14.71303262805411</coordinates></LinearRing></outerBoundaryIs></Polygon>
   </Placemark>
 </Folder>
 </Document></kml>

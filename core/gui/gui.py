@@ -152,6 +152,11 @@ class GUI(tk.Tk):
         
         
     def get_dets(self):
+        op = self.output_path.get()
+        op = op.split('\\')
+        if len(op):
+            op = op.split('/')
+        op = os.path.join(op)
         return [self.name, self.output_path.get(), self.input_image_path.get()]
     
 

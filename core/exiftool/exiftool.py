@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.append(os.getcwd())
+if __name__ == "__main__":
+    sys.path.append(os.getcwd())
 from core.geo_coordinate import GeoCoordinate
 from core.app_logger import AppLogger
 import exiftool
@@ -33,4 +34,4 @@ class Exiftool:
             return None
         
 if __name__ == '__main__':
-    Exiftool.find_geo_location_image()
+    Exiftool.find_geo_location_image(image_path=r"C:\Users\Admin\Downloads\geotagged_images\geotagged_images\DSC00148.JPG", print_data=True)

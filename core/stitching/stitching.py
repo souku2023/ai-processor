@@ -28,18 +28,25 @@ class Stitching:
             sys.exit()
         else:
             path = os.path.dirname(images_in_plots[0]["images_path"])
-            # WebODM.create_projects_from_folder(path=path, 
-            #                                    name=project_name, 
-            #                                    description=None, 
-            #                                    cleanup_local_images=True)
+            WebODM.create_projects_from_folder(path=path, 
+                                               name=project_name, 
+                                               description=None, 
+                                               cleanup_local_images=True)
 
 if __name__ == "__main__":
-    day =      input("Enter Day: ")
-    date =     input("Enter Date (eg: 12Feb24): ")
-    img_type = input("Enter Image Type (RGB or MS): ")
-    alt =      input("Enter Altitude (60, 80, 120): ")
-    session =  input("Enter Session (Morning, Afternoon, Evening): ")
-    speed = "10ms"
+    # day =      input("Enter Day: ")
+    # date =     input("Enter Date (eg: 12Feb24): ")
+    # img_type = input("Enter Image Type (RGB or MS): ")
+    # alt =      input("Enter Altitude (60, 80, 120): ")
+    # session =  input("Enter Session (Morning, Afternoon, Evening): ")
+    # speed = "5ms"
+    
+    day =      2
+    date =     "13Mar24"
+    img_type = "RGB"
+    alt =      120
+    session =  "Afternoon"
+    speed = "5ms"
     
     name = f"DAY{day}_{date}_{img_type}_{alt}m_{session}"
     
@@ -48,8 +55,8 @@ if __name__ == "__main__":
     else:
         name = name+"_5ms"
     
-    input_dir = r"G:\BAYER\PHASE-2\VISIT-2\_13-3-24 MS 60m 10ms 41 ac\13-3-24 MS 60m 10ms 41 ac\0000SET\ALL"
-    output_dir = r"G:\BAYER\poltwise_and_stitched_images\VISIT-2\day1\{}".format(name)
+    input_dir = r"C:\Users\Admin\Downloads\14_geotagged)\geotagged_images"
+    output_dir = r"G:\BAYER\poltwise_and_stitched_images\VISIT-2\day3\{}".format(name)
     
     
     Stitching.stitch_images_by_kml(input_dir=input_dir, output_dir=output_dir, project_name=name)
