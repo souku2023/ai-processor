@@ -284,37 +284,46 @@ class PreStitchProcessing:
         return new_images, new_neighboorhood_images
     
     @staticmethod
-    def __get_images_from_neighborhood_buffered_border_polygon(kml:KML, images_in_neighboorhood:list[RawMSImage])->tuple[list[RawMSImage], list[RawMSImage]]:
+    def __get_images_from_neighborhood_buffered_border_polygon(images_in_neighboorhood:list[RawMSImage], 
+                                                               kml:KML|None=None, 
+                                                               polygon:Polygon|None=None)->tuple[list[RawMSImage], list[RawMSImage]]:
         """
         """
         # 
+        if kml is not None:
+            polygon = kml.border_polygon
+        elif kml is None and polygon is None:
+            raise Exception("At least 1 of polygon on kml must be specified")
         new_images = list()
         new_neighboorhood_images = list()
         lats = []
         euclidean_distances_list = []
-        neighboorhood_multipoint = MultiPoint([(image.geo_location.LAT, image.geo_location.LON) for image in images_in_neighboorhood])
-        for coord in kml.border_polygon.exterior.coords:
+        neighboorhood_multipoint = MultiPoint([(image.geo_location.LON, image.geo_location.LAT) for image in images_in_neighboorhood])
+        for coord in polygon.exterior.coords:
             origin, nearest_image_loc = nearest_points(Point(coord), neighboorhood_multipoint)
             euclidean_distance = Point(coord).distance(nearest_image_loc)
             euclidean_distances_list.append(euclidean_distance)
             # print(euclidean_distance)
-            
+        
         max_euclidean_dist = max(euclidean_distances_list)
         # print(max_euclidean_dist)
         
-        new_polygon = kml.border_polygon.buffer(max_euclidean_dist)
+        new_polygon = polygon.buffer(1*max_euclidean_dist)
             
         for image in images_in_neighboorhood:
             # print(new_polygon, image.geo_loc_point)
             if new_polygon.contains(image.geo_loc_point):
-                # AppLogger.info(f"PreStitchProcessing, New image found for {kml}: {image}")
                 new_images.append(image)
             else:
                 new_neighboorhood_images.append(image)
                 
-        # plt.fill(*kml.border_polygon.exterior.xy, alpha=0.2, c='r')
-        # # plt.fill(*new_polygon.exterior.xy, alpha=0.2, c='g')
+        # plt.fill(*polygon.exterior.xy, alpha=0.2, c='r')
+        # plt.fill(*new_polygon.exterior.xy, alpha=0.1, c='g')
+        # for im in new_images:
+        #     print(im)
+        #     plt.scatter(im.geo_location.LON, im.geo_location.LAT, c='r', s=5)
         # plt.show()
+        # PreStitchProcessing.__visualise_images_in_polygon()
 
         return new_images, new_neighboorhood_images
     
@@ -329,7 +338,7 @@ class PreStitchProcessing:
         new_images = list()
         lats = []
         lons = []
-        neighboorhood_multipoint = MultiPoint([(image.geo_location.LAT, image.geo_location.LON) for image in images_in_neighboorhood])
+        neighboorhood_multipoint = MultiPoint([(image.geo_location.LON, image.geo_location.LAT) for image in images_in_neighboorhood])
         for coord in polygon.exterior.coords:
             _, nearest_image_loc = nearest_points(Point(coord), neighboorhood_multipoint)
             lat, lon = nearest_image_loc.x, nearest_image_loc.y
@@ -359,145 +368,6 @@ class PreStitchProcessing:
                 new_neighboorhood_images.append(image)
 
         return new_images, new_neighboorhood_images
-
-            
-    @staticmethod
-    def __sort_images_from_kmls_and_groups(path_to_images:str,
-                                 min_images_per_kml_rgb:int=100,
-                                 min_images_per_kml_ms:int=10
-                                 )->list[dict]:
-        """
-        """
-
-        kmls = PreStitchProcessing.__read_kmls()
-        image_type, images = PreStitchProcessing.__get_images(path=path_to_images)
-        grouped_image_list = list()
-        # If found images are Multispectral
-        if image_type == PreStitchProcessing.ImageType.MS:
-        # if image_type == PreStitchProcessing.ImageType.MS or image_type == PreStitchProcessing.ImageType.RGB:
-
-            for kml in kmls:
-                images_in_kml, images_in_neighboorhood = PreStitchProcessing.__get_images_in_kml(kml=kml, images=images)
-                k=1
-
-                while len(images_in_kml)<min_images_per_kml_ms and len(images_in_kml)>0:
-                    if k>3:
-                        break
-                    AppLogger.info(f"Not enough images in {kml} k={k}: {len(images_in_kml)}")
-                    new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_ms_kml(
-                        kml=kml, 
-                        images_in_neighboorhood=images_in_neighboorhood
-                        )
-                    for new_image in new_images:
-                        images_in_kml.append(new_image)
-                    k+=1
-
-                if len(images_in_kml)>0:
-                    PreStitchProcessing.__visualise_images_in_polygon(
-                        kml.border_polygon,
-                        points=[image.geo_loc_point for image in images_in_kml],
-                        name=f"Images for {kml.name}",
-                        timeout=2
-                    )
-                    AppLogger.info(f"Found {len(images_in_kml)} for {kml}")
-                    grouped_image_list.append(
-                        {
-                            "name": kml.name,
-                            "images": images_in_kml,
-                            "type": image_type
-                        }
-                        )
-            # Visualise all the images on all the polygons
-            AppLogger.info(f"{len(images)}")
-            PreStitchProcessing.__visualise_images_in_polygon(
-                polygon=[kml.kml_polygon for kml in kmls],
-                points=[image_.geo_loc_point for image_ in images],
-                name="All Images in all the plot"
-            )
-
-            
-        # If found images are RGB
-        elif image_type == PreStitchProcessing.ImageType.RGB:
-            group1 = [
-                "ECO_KA_HAV_RAN_BEL_046_1",
-                "ECO_KA_HAV_RAN_BEL_078_1",
-                "ECO_KA_HAV_RAN_BEL_060_3",
-                "ECO_KA_HAV_RAN_BEL_005_5",
-                "ECO_KA_HAV_RAN_BEL_009_1"
-                ]
-            group2 = [
-                "ECO_KA_HAV_RAN_BEL_050_1",
-                "ECO_KA_HAV_RAN_BEL_062_1",
-                "ECO_KA_HAV_RAN_BEL_063_1",
-                "ECO_KA_HAV_RAN_BEL_064_1",
-                "ECO_KA_HAV_RAN_BEL_049_1"
-            ]
-
-            group1_polygons = []
-            group2_polygons = []
-
-            for kml in kmls:
-                if kml.name in group1:
-                    group1_polygons.append(kml.kml_polygon)
-                elif kml.name in group2:
-                    group2_polygons.append(kml.kml_polygon)
-
-            multipolygons = {
-                "G1": MultiPolygon(group1_polygons), 
-                "G2": MultiPolygon(group2_polygons)
-                }
-
-            for group in multipolygons:
-                multipolygon = multipolygons[group]
-                min_lat, min_lon, max_lat, max_lon = multipolygon.bounds
-                # AppLogger.info(multipolygon)
-                new_polygon = Polygon(
-                [
-                    (min_lat, min_lon),
-                    (max_lat, min_lon),
-                    (max_lat, max_lon),
-                    (min_lat, max_lon),
-                    (min_lat, min_lon)
-                ]
-                )
-
-                images_in_polygon, images_in_neighboorhood = PreStitchProcessing.__get_images_in_polygon(new_polygon, images)
-                k=1
-                while len(images_in_polygon)<min_images_per_kml_rgb:
-                    if k==3:
-                        break
-                    AppLogger.info(f"PreStitchProcessing, Not enough images in polygon k={k}: {len(images_in_polygon)}")
-                    new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_in_neighborhood_polygon(polygon=new_polygon, 
-                                                                            images_in_neighboorhood=images_in_neighboorhood)
-                        
-                    for new_im in new_images:
-                        images_in_polygon.append(new_im)
-
-                    k+=1
-
-                AppLogger.info(f"Found {len(images_in_polygon)}")
-                grouped_image_list.append(
-                    {
-                        "name": group,
-                        "images": images_in_polygon,
-                        "type": image_type
-                    }
-                    )
-                
-                # PreStitchProcessing.__visualise_images_in_polygon(
-                #     polygon=new_polygon, 
-                #     points=[image.geo_loc_point for image in images_in_polygon],
-                #     name=f"Images in {group}"
-                #     )
-            
-            AppLogger.info(f"PreStitchPreocessing, Total images : {len(images)}")
-            PreStitchProcessing.__visualise_images_in_polygon(
-                polygon=[kml.kml_polygon for kml in kmls],
-                points=[image_.geo_loc_point for image_ in images],
-                name="All Images in all the plots"
-            )
-
-        return grouped_image_list
     
 
     @staticmethod
@@ -526,8 +396,8 @@ class PreStitchProcessing:
                         break
                     AppLogger.info(
                         f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_ms}]")
-                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k}")
-                    new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_ms_kml(
+                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k} using __get_images_from_neighborhood_buffered_border_polygon")
+                    new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_buffered_border_polygon(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
                         )
@@ -541,7 +411,7 @@ class PreStitchProcessing:
                         break
                     AppLogger.info(
                         f"PreStitchProcessing, Not enough images in {kml} {len(images_in_kml)} [min: {min_images_per_kml_rgb}]")
-                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k}")
+                    AppLogger.info(f"PreStitchProcessing, Searching for images in neighboorhood k={k} using __get_images_from_neighborhood_buffered_border_polygon")
                     new_images, images_in_neighboorhood = PreStitchProcessing.__get_images_from_neighborhood_buffered_border_polygon(
                         kml=kml, 
                         images_in_neighboorhood=images_in_neighboorhood
@@ -556,7 +426,7 @@ class PreStitchProcessing:
                     kml.kml_polygon,
                     points=[image.geo_loc_point for image in images_in_kml],
                     name=f"Images for {kml.name}",
-                    timeout=2
+                    timeout=10
                 )
                 AppLogger.info(f"PreStitchProcessing, Totally Found {len(images_in_kml)} for {kml}")
                 AppLogger.info("")
@@ -647,13 +517,13 @@ class PreStitchProcessing:
                     for geom in poly.geoms:  
                         # AppLogger.info(f"{poly}. {points[0]}")  
                         xs, ys = geom.exterior.xy    
-                        axs.fill(xs, ys, alpha=0.5, fc='r', ec='none')
+                        axs.fill(xs, ys,c='r', alpha=0.5, ec='none')
                         
 
                     for point in points:
                         if point.x == 0 or point.y == 0:
                             continue
-                        axs.scatter(point.y, point.x, c='blue') 
+                        axs.scatter(point.x, point.y, c='blue') 
 
                     if name is not None:
                         plt.title(name)
@@ -666,9 +536,9 @@ class PreStitchProcessing:
                     fig = plt.figure()
                     timer = fig.canvas.new_timer(interval = timeout*1000) 
                     timer.add_callback(plt.close)
-                    plt.fill(x, y, c='red', alpha=0.5)
+                    plt.fill(x, y, alpha=0.5)
                     for point in points:
-                        plt.scatter(point.y, point.x, c='blue')
+                        plt.scatter(point.x, point.y, c='blue')
 
                     if name is not None:
                         plt.title(name)
@@ -681,9 +551,9 @@ class PreStitchProcessing:
                 fig = plt.figure()
                 timer = fig.canvas.new_timer(interval = timeout*1000) 
                 timer.add_callback(plt.close)
-                plt.fill(x, y, c='red', alpha=0.5)
+                plt.fill(x, y, alpha=0.5)
                 for point in points:
-                    plt.scatter(point.y, point.x, c='blue')
+                    plt.scatter(point.x, point.y, c='blue')
 
                 if name is not None:
                     plt.title(name)
@@ -728,7 +598,7 @@ class PreStitchProcessing:
 
 if __name__ == "__main__":
     path = r"C:\Users\sahas\OneDrive\Desktop\Comp\000"
-    path = r"G:\BAYER\PHASE-2\VISIT-2\13-3-24 RGB 120m 5ms 100ac\13-3-24 RGB 120m 5ms 100ac\geotagged_images"
+    path = r"G:\BAYER\PHASE-2\VISIT-2\_13-3-24 MS 60m 10ms 41 ac\13-3-24 MS 60m 10ms 41 ac\0000SET\ALL"
     # path = r"D:\data\11-Feb-2024_120meter_12ac_MS\Zoho WorkDrive (4)"
     # print(list(map(os.path.join, ["C:", "D:", "E:"], ["a", "b", "c"])))
     # Idea: Calculate the direction of the movement of the drone and then 

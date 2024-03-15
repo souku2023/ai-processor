@@ -25,8 +25,8 @@ class RawMSImage:
         else:
             self.geo_location = geo_coords
         
-        self.geo_loc_point = Point(self.geo_location.LAT, self.geo_location.LON)
-        AppLogger.info(f"RawMSImage, Found raw multispectral image {self.red_path[0:-6]} @ {self.geo_location.LAT}, {self.geo_location.LON}")
+        self.geo_loc_point = Point(self.geo_location.LON, self.geo_location.LAT)
+        AppLogger.info(f"RawMSImage, Found raw multispectral image {self.red_path[0:-6]} @ {self.geo_location.LON}, {self.geo_location.LAT}")
 
     
     def __find_geo_location_image(self, image_path:str)->GeoCoordinate|None:

@@ -19,7 +19,7 @@ class Stitching:
         images_in_plots = PreStitchProcessing.sort_images_by_kml(
             input_dir=input_dir,
             output_dir=output_dir,
-            extra_image_search_iteration=2)
+            extra_image_search_iteration=1)
         
         os.makedirs(output_dir, exist_ok=True)
         
@@ -28,10 +28,10 @@ class Stitching:
             sys.exit()
         else:
             path = os.path.dirname(images_in_plots[0]["images_path"])
-            WebODM.create_projects_from_folder(path=path, 
-                                               name=project_name, 
-                                               description=None, 
-                                               cleanup_local_images=True)
+            # WebODM.create_projects_from_folder(path=path, 
+            #                                    name=project_name, 
+            #                                    description=None, 
+            #                                    cleanup_local_images=True)
 
 if __name__ == "__main__":
     day =      input("Enter Day: ")
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     else:
         name = name+"_5ms"
     
-    input_dir = r"G:\BAYER\PHASE-2\VISIT-2\13-3-24 RGB 120m 5ms 100ac\13-3-24 RGB 120m 5ms 100ac\geotagged_images"
+    input_dir = r"G:\BAYER\PHASE-2\VISIT-2\_13-3-24 MS 60m 10ms 41 ac\13-3-24 MS 60m 10ms 41 ac\0000SET\ALL"
     output_dir = r"G:\BAYER\poltwise_and_stitched_images\VISIT-2\day1\{}".format(name)
     
     
