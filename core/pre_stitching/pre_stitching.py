@@ -317,13 +317,11 @@ class PreStitchProcessing:
             else:
                 new_neighboorhood_images.append(image)
                 
-        # plt.fill(*polygon.exterior.xy, alpha=0.2, c='r')
-        # plt.fill(*new_polygon.exterior.xy, alpha=0.1, c='g')
-        # for im in new_images:
-        #     print(im)
-        #     plt.scatter(im.geo_location.LON, im.geo_location.LAT, c='r', s=5)
-        # plt.show()
-        # PreStitchProcessing.__visualise_images_in_polygon()
+        PreStitchProcessing.__visualise_images_in_polygon(
+            polygon=[polygon, new_polygon], 
+            points=[im.geo_loc_point for im in new_images], 
+            timeout=1
+            )
 
         return new_images, new_neighboorhood_images
     
@@ -369,7 +367,6 @@ class PreStitchProcessing:
 
         return new_images, new_neighboorhood_images
     
-
     @staticmethod
     def __sort_images_from_kmls(path_to_images:str,
                                  min_images_per_kml_rgb:int=100,
@@ -509,22 +506,19 @@ class PreStitchProcessing:
             # If the input is a list of polygons
             if polygon.__class__.__qualname__ == 'list':
                 if len(polygon)>1:
-                    poly = unary_union(polygon)
                     fig, axs = plt.subplots()
                     timer = fig.canvas.new_timer(interval = timeout*1000) 
                     timer.add_callback(plt.close)
                     axs.set_aspect('equal', 'datalim')
-                    for geom in poly.geoms:  
+                    # Plot the polygons
+                    for geom in polygon:  
                         # AppLogger.info(f"{poly}. {points[0]}")  
                         xs, ys = geom.exterior.xy    
-                        axs.fill(xs, ys,c='r', alpha=0.5, ec='none')
-                        
-
+                        axs.fill(xs, ys,c='r', alpha=0.2, ec='none')
                     for point in points:
                         if point.x == 0 or point.y == 0:
                             continue
                         axs.scatter(point.x, point.y, c='blue') 
-
                     if name is not None:
                         plt.title(name)
                 else:
@@ -536,14 +530,12 @@ class PreStitchProcessing:
                     fig = plt.figure()
                     timer = fig.canvas.new_timer(interval = timeout*1000) 
                     timer.add_callback(plt.close)
-                    plt.fill(x, y, alpha=0.5)
+                    plt.fill(x, y, alpha=0.2)
                     for point in points:
                         plt.scatter(point.x, point.y, c='blue')
 
                     if name is not None:
                         plt.title(name)
-
-
             else:
                 # If the input is a single Polygon
                 x, y = polygon.exterior.xy
@@ -551,7 +543,7 @@ class PreStitchProcessing:
                 fig = plt.figure()
                 timer = fig.canvas.new_timer(interval = timeout*1000) 
                 timer.add_callback(plt.close)
-                plt.fill(x, y, alpha=0.5)
+                plt.fill(x, y, alpha=0.2)
                 for point in points:
                     plt.scatter(point.x, point.y, c='blue')
 
